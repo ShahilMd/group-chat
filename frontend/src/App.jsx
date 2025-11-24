@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { connectWS } from './ws';
+import {toast, Toaster} from 'react-hot-toast';
+
 
 export default function App() {
     const timer = useRef(null);
@@ -13,42 +15,38 @@ export default function App() {
     const [text, setText] = useState('');
 
     useEffect(() => {
-        socket.current = connectWS();
+         socket.current = connectWS();
 
-        socket.current.on('connect', () => {
-            socket.current.on('roomNotice', (userName) => {
-                console.log(`${userName} joined to group!`);
-            });
+         socket.current.on('connect',() => {
+            socket.current.on('roomNotice',(userName)=>{
+                toast.success(`${userName} has joined the group`)
+            })
 
-            socket.current.on('chatMessage', (msg) => {
-                // push to existing messages list
-                console.log('msg', msg);
-                setMessages((prev) => [...prev, msg]);
-            });
-
-            socket.current.on('typing', (userName) => {
-                setTypers((prev) => {
+             socket.current.on('chatMessage',(message)=>{
+                 //push to existing message list
+                 console.log(message);
+                 setMessages((prev) =>[...prev, message])
+             })
+             socket.current.on('typing',(userName)=>{
+                setTypers((prev)=>{
                     const isExist = prev.find((typer) => typer === userName);
-                    if (!isExist) {
-                        return [...prev, userName];
+                    if(!isExist){
+                        return [...prev,userName];
                     }
-
                     return prev;
-                });
-            });
-
-            socket.current.on('stopTyping', (userName) => {
-                setTypers((prev) => prev.filter((typer) => typer !== userName));
-            });
-        });
-
+                })
+             })
+             socket.current.on('stopTyping',(userName)=>{
+                 setTypers((prev)=> prev.filter((typer) => typer !== userName))
+             })
+         })
         return () => {
-            socket.current.off('roomNotice');
-            socket.current.off('chatMessage');
-            socket.current.off('typing');
-            socket.current.off('stopTyping');
-        };
-    }, []);
+             socket.current.off('roomNotice')
+             socket.current.off('chatMessage')
+             socket.current.off('typing')
+             socket.current.off('stopTyping')
+        }
+    },[])
 
     useEffect(() => {
         if (text) {
@@ -220,6 +218,7 @@ export default function App() {
                     </div>
                 </div>
             )}
+            <Toaster/>
         </div>
     );
 }
