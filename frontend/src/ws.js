@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
 
 export function connectWS() {
-    return io('http://localhost:3000');
+    return io('https://group-chat-bec9.onrender.com');
 }
